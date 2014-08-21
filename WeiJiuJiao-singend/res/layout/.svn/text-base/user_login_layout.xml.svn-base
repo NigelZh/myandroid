@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="15dp" >
+        
+        <EditText
+            android:id="@+id/ed__user_login_account"        
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/input_bg"
+            android:hint="邮箱/手机"
+            android:singleLine="true"
+            android:padding="10dp"
+            android:textColor="@color/black" />
+
+        <EditText
+            android:id="@+id/ed__user_login_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/input_bg"
+            android:hint="密码"
+            android:singleLine="true"
+            android:layout_marginTop="10dp"
+            android:padding="10dp"
+            android:password="true"
+            android:textColor="@color/black" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <RelativeLayout
+                android:id="@+id/rl_user_login_RelativeLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp" >
+
+                <CheckBox
+                    android:id="@+id/ck_user_login_Remember_password"
+                    style="@style/CustomCheckboxPassword"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:padding="10dp" />
+
+                <TextView
+                    android:id="@+id/tv_user_login_Remember_password"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@id/ck_user_login_Remember_password"
+                    android:text="记住密码" />
+
+                <TextView
+                    android:id="@+id/tv_user_login_Display_password"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:text="显示密码" />
+
+                <CheckBox
+                    android:id="@+id/ck_user_login_Display_password"
+                    style="@style/CustomCheckboxPassword"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@id/tv_user_login_Display_password"
+                    android:padding="10dp" />
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/btn_user_login_login_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/rl_user_login_RelativeLayout"
+                android:text="登录"
+                android:padding="10dp"
+                android:textColor="@color/white"
+                android:background="@drawable/btn_login_bg"/>
+
+            <TextView
+                android:id="@+id/tv_user_login_forgot_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:padding="10dp"
+                android:text="忘记密码" />
+
+            <TextView
+                android:id="@+id/tv_user_login_register"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:padding="10dp"
+                android:text="新用户注册" />
+        </RelativeLayout>
+    </LinearLayout>
+
+</ViewFlipper>

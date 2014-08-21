@@ -1,0 +1,162 @@
+package com.tempus.weijiujiao.fragment;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONException;
+
+import com.tempus.weijiujiao.R;
+import com.tempus.weijiujiao.HTTP.ParserResult;
+import com.tempus.weijiujiao.HTTP.Result;
+import com.tempus.weijiujiao.HTTP.Service;
+import com.tempus.weijiujiao.HTTP.onResultListener;
+import com.tempus.weijiujiao.Utils.Debug;
+import com.tempus.weijiujiao.Utils.JsonParser;
+import com.tempus.weijiujiao.Utils.ToastUtils;
+import com.tempus.weijiujiao.bean.ProductInfo;
+import com.tempus.weijiujiao.bean.ProductInfo.VarietyInfo;
+import com.tempus.weijiujiao.constant.Constant;
+
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.app.Fragment;
+import android.text.Html;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+/**
+ * 商品葡萄品种信息
+ * @author _blank :24611015@qq.com
+ *
+ */
+public class ProductVarietyInfoFrament extends Fragment {
+	private LayoutInflater inflater;
+	private String code;
+	private int codeType;
+	private List<VarietyInfo> varietyList;
+	private LinearLayout contentner;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		code = getArguments().getString("code");
+		codeType = getArguments().getInt("codeType", -1);
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		super.onCreateView(inflater, container, savedInstanceState);
+		this.inflater = inflater;
+		View rootview = inflater.inflate(R.layout.product_assortment_info_layout, container, false);
+		contentner = (LinearLayout) rootview.findViewById(R.id.variety_contener);
+		return rootview;
+	}
+
+	public void onResume() {
+		super.onResume();
+		if (varietyList == null) {
+			varietyList = new ArrayList<VarietyInfo>();
+		}
+		if (varietyList.size() <= 0) {
+			requestVarietyInfo();
+		} else {
+			setViewS();
+		}
+
+	}
+
+	private void setViewS() {
+		// TODO Auto-generated method stub
+		if(varietyList!=null&&varietyList.size()>0){
+			contentner.removeAllViews();
+			for (VarietyInfo vinfo : varietyList) {
+				View itemView = inflater.inflate(R.layout.variety_layout_item, null);
+				((TextView) itemView.findViewById(R.id.product_varietyInfo_item_title)).setText(vinfo.getName() + vinfo.getName_en());
+				((TextView) itemView.findViewById(R.id.product_varietyInfo_item_content)).setText(Html.fromHtml(vinfo.getDesc()));
+				contentner.addView(itemView);
+			}
+		}
+	}
+
+	Handler uihandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case 0:
+				setViewS();
+				break;
+			case 1:
+				ToastUtils.toastMessage("找不到该商品信息~！");
+				break;
+			case 2:
+				ToastUtils.toastMessage("服务器返回数据异常，无法识别~！");
+				break;
+			case 3:
+				ToastUtils.toastMessage("网络异常~！");
+				break;
+			default:
+				break;
+			}
+		}
+	};
+
+	private void requestVarietyInfo() {
+		// TODO Auto-generated method stub
+		int type = -1;
+		switch (codeType) {
+		case Constant.Tag.TAG_CODE_TYPE_BARCODE:
+			type = 0;
+			break;
+		case Constant.Tag.TAG_CODE_TYPE_CODE:
+			type = 1;
+			break;
+		case Constant.Tag.TAG_CODE_TYPE_PRODUCTID:
+			type = 3;
+			break;
+		case Constant.Tag.TAG_CODE_TYPE_RFID:
+			type = 2;
+			break;
+
+		default:
+			break;
+		}
+		Service.getInstance(getActivity()).requestGetProductInfo(code, type, 3,
+				new onResultListener() {
+					@Override
+					public void onResult(Result result) {
+						// TODO Auto-generated method stub
+						try {
+							ParserResult presult = JsonParser
+									.parserProductInfo(result.getJsonBody());
+							if (presult.getCode() == 0) {
+								ProductInfo pinfo = (ProductInfo) presult
+										.getObj();
+								if (pinfo.getVarietyInfoList() != null) {
+									varietyList = pinfo.getVarietyInfoList();
+									uihandler.sendEmptyMessage(0);
+								} else if (presult.getCode() == 1) {
+									uihandler.sendEmptyMessage(1);
+								}
+							}
+
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							uihandler.sendEmptyMessage(2);
+						}
+					}
+
+					@Override
+					public void onNetError(Result result) {
+						// TODO Auto-generated method stub
+						uihandler.sendEmptyMessage(3);
+						Debug.Out("reuslt info="+result.getErrorInfo());
+					}
+				});
+
+	}
+}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@drawable/all_list_item_bg"
+    android:paddingTop="20dp"
+    android:paddingBottom="20dp">
+
+    <TextView
+        android:id="@+id/tv_gradevin_infor_list_otheritem_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:layout_gravity="left|center_vertical"       
+        android:layout_marginLeft="15dp"         
+        android:text="酒柜昵称" />
+
+    <TextView
+        android:id="@+id/tv_gradevin_infor_list_otheritem_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="right|center_vertical"
+        android:layout_gravity="center_vertical" 
+        android:paddingRight="15dp"          
+        android:text="爱吃嫩草的老黄牛"        
+        android:textColor="@color/gary"/>
+
+    <ImageView
+        android:id="@+id/imbtn_gradevin_infor_list_otheritem_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:layout_marginRight="15dp"
+        android:background="@drawable/img_btn_arrow" />
+
+</LinearLayout>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView 
+        android:id="@+id/winecellarmanager_regional_area_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"        
+        android:gravity="center"
+        android:text="A区"
+        android:layout_margin="0dp"
+        android:background="@drawable/area_bg_up"/>
+    <TextView
+        android:id="@+id/winecellarmanager_regional_stock_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"      
+        android:gravity="center"   
+        android:text="300瓶"
+        android:layout_margin="0dp"
+        android:background="@drawable/area_bg_down"/>
+</LinearLayout>

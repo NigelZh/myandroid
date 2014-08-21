@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:id="@+id/card_grouping_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:padding="0.0dip" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <RadioGroup
+                android:id="@+id/radiogroup_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal" >
+
+                <RadioButton
+                    android:id="@+id/rbtn_day"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2.4"
+                    android:background="@drawable/radiogroup_time_bg"
+                    android:button="@null"
+                    android:checked="true"
+                    android:gravity="center"
+                    android:text="按天查"
+                    android:textColor="#E33539"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+
+                <RadioButton
+                    android:id="@+id/rbtn_month"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2.4"
+                    android:background="@drawable/radiogroup_time_bg"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:text="按月查"
+                    android:textColor="@android:color/black"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+
+                <RadioButton
+                    android:id="@+id/rbtn_year"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2.4"
+                    android:background="@drawable/radiogroup_time_bg"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:text="按年查"
+                    android:textColor="@android:color/black"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+
+                <RadioButton
+                    android:id="@+id/rbtn_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2.8"
+                    android:background="@drawable/radiogroup_time_bg"
+                    android:button="@null"
+                    android:gravity="center"
+                    android:text="按时间段查"
+                    android:textColor="@android:color/black"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <!-- 时间阶段选择 -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:showDividers="end"
+             >
+
+            <TextView
+                android:id="@+id/tv_selecttime_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="选择日期"
+                android:layout_weight="8"
+                android:layout_marginLeft="5dp"
+                android:textSize="16dp" />
+
+            <TextView
+                android:id="@+id/tv_selecttime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2014年7月2日"
+                android:layout_weight="2"
+                android:textSize="16dp" />
+
+            <ImageButton
+                android:id="@+id/img_btn_selecttime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/img_btn_arrow" />
+
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/lv_Gradevin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+             >
+        </ListView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal"
+            android:padding="3dip" >
+
+            <com.tempus.weijiujiao.view.SaleReportHorizontalListView
+                android:id="@+id/imgList_sale_report"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btn_sale_report_makesureBtn"
+                android:layout_width="100dp"
+                android:layout_height="35dp"
+                android:layout_gravity="right|center_vertical"
+                android:background="@drawable/bg_btn_bg_makesure_bg"
+                android:text="确定" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+
+</FrameLayout>

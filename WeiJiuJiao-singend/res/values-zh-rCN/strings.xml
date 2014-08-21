@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">腾邦名酒</string>
+    <string name="hello_world">世界，你好!</string>
+    <string name="action_settings">设置</string>
+    <string name="scan_text">请讲二维码放入扫描框内，将自动扫描</string>
+</resources>

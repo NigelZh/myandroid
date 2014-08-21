@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:padding="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg"
+        android:weightSum="5"
+        android:orientation="horizontal" >
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="4" >
+
+            <EditText
+                android:id="@+id/et_gradevin_locationshow_search"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_alignParentLeft="true"
+                android:background="@drawable/img_search_bg"
+                android:ems="18"
+                android:gravity="center"
+                android:singleLine="true"
+                android:hint="请输入要搜索的酒名"
+                android:textSize="12sp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/et_gradevin_locationshow_search"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/img_btn_search_small" />
+
+            <ImageButton
+                android:id="@+id/img_btn_gradevin_locationshow_search_del"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignRight="@id/et_gradevin_locationshow_search"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/imt_btn_del"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/img_btn_gradevin_speachsearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignRight="@id/et_gradevin_locationshow_search"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="10dp"                
+                android:background="@drawable/img_btn_speach" />
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/btn_gradevin_locationshow_doSearch"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="30dp"
+            android:background="#00000000"
+            android:singleLine="true"
+            android:text="确定"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/lv_gradevin_locationshow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </ListView>
+
+</LinearLayout>

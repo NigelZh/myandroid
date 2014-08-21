@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:padding="15dp"
+    android:background="@drawable/all_list_item_bg" >
+
+    <ImageView
+        android:id="@+id/img_share_app_list_item_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_vertical"
+        android:layout_margin="5dp"
+        android:background="@drawable/icon_pengyouquan" />
+
+    <TextView
+        android:id="@+id/tv_share_app_list_item_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_vertical"
+        android:layout_weight="1"
+        android:gravity="left"
+        android:text="分享到朋友圈" />
+
+    <ImageView
+        android:id="@+id/img_share_app_list_item_pic_go"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:background="@drawable/img_btn_arrow" />
+
+</LinearLayout>

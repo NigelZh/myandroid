@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <RadioGroup
+            android:id="@+id/rg_sale_report_gradevin_and_winecellar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingBottom="10dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
+            android:paddingTop="10dp" >
+
+            <RadioButton
+                android:id="@+id/rbtn_sale_report_gradevin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/ridaogroup_sale_report_gradevinr"
+                android:button="@null"
+                android:gravity="center"
+                android:checked="true"
+                android:text="酒柜"
+                android:textColor="@color/red"
+                android:textSize="20dp" />
+
+            <RadioButton
+                android:id="@+id/rbtn_sale_report_winecellar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/ridaogroup_sale_report_winecellar"
+                android:button="@null"              
+                android:gravity="center"
+                android:text="酒窖"
+                android:textColor="@color/white"
+                android:textSize="20dp" />
+        </RadioGroup>
+
+        <RadioGroup
+            android:id="@+id/rg_sale_report_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <RadioButton
+                android:id="@+id/rbtn_sale_report_day"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/radiogroup_time_bg"
+                android:button="@null"
+                android:checked="true"
+                android:gravity="center"
+                android:text="按天查"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textColor="@color/red"
+                android:textSize="16dp" />
+
+            <RadioButton
+                android:id="@+id/rbtn_sale_report_month"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/radiogroup_time_bg"
+                android:button="@null"
+                android:gravity="center"
+                android:text="按月查"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textColor="@android:color/black"
+                android:textSize="16dp" />
+
+            <RadioButton
+                android:id="@+id/rbtn_sale_report_year"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/radiogroup_time_bg"
+                android:button="@null"
+                android:gravity="center"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:text="按年查"
+                android:textColor="@android:color/black"
+                android:textSize="16dp" />
+
+            <RadioButton
+                android:id="@+id/rbtn_sale_report_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/radiogroup_time_bg"
+                android:button="@null"
+                android:gravity="center"
+                android:text="按时间段查"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textColor="@android:color/black"
+                android:textSize="16dp" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/rl_sale_report_start_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp" >
+
+                <TextView
+                    android:id="@+id/tv_sale_report_start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:text="选择日期" />
+
+                <TextView
+                    android:id="@+id/tv_sale_report_start_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:drawablePadding="10dp"
+                    android:drawableRight="@drawable/img_btn_arrow"
+                    android:text="2014年" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:visibility="gone"
+                android:id="@+id/rl_sale_report_end_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp" >
+
+                <TextView
+                    android:id="@+id/tv_sale_report_end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:text="结束日期" />
+
+                <TextView
+                    android:id="@+id/tv_sale_report_end_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:drawablePadding="10dp"
+                    android:drawableRight="@drawable/img_btn_arrow"
+                    android:text="2014年" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/lv_sale_report_Gradevin_and_winecellar"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" >
+        </ListView>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="3dip" >
+            <com.tempus.weijiujiao.view.SaleReportHorizontalListView
+                android:id="@+id/imgList_sale_report"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/btn_sale_report_makesureBtn"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/bg_btn_bg_makesure_bg"
+                android:text="确定" />
+        </RelativeLayout>
+    </LinearLayout>
+
+</ViewFlipper>

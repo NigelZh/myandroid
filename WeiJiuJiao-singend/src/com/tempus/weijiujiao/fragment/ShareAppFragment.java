@@ -1,0 +1,119 @@
+package com.tempus.weijiujiao.fragment;
+
+
+import com.tempus.weijiujiao.R;
+import com.tempus.weijiujiao.Utils.Debug;
+import com.tempus.weijiujiao.Utils.ToastUtils;
+import com.tempus.weijiujiao.adapter.ShareAppListViewAdapter;
+import com.tempus.weijiujiao.constant.Constant;
+import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.sdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.sdk.modelmsg.WXTextObject;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+
+
+/**
+ * 意见反馈
+ * @author lenovo
+ *
+ */
+public class ShareAppFragment extends Fragment {
+	private IWXAPI WXApi;
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		initWXshare();
+	}
+
+	private void initWXshare() {
+		// TODO Auto-generated method stub
+		WXApi=WXAPIFactory.createWXAPI(getActivity(), Constant.WXShare.appid, true);
+		if(WXApi.registerApp(Constant.WXShare.appid)){
+			Debug.Out("registre to wxapp done ");
+		}
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		LinearLayout llFeedback = (LinearLayout) inflater.inflate(R.layout.share_app_layout, null);
+		ListView listView = (ListView)llFeedback.findViewById(R.id.lv_share_app);
+		listView.setAdapter(new ShareAppListViewAdapter(inflater));
+		listView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				// TODO Auto-generated method stub
+				if(arg2==0){
+					share2WX(1);
+				}else if(arg2==1){
+					share2WX(2);
+				}else{
+					toastString("平台分享审核中~敬请期待");
+				}
+			}
+		});
+
+		return llFeedback;
+	}
+	/**
+	 * 分享到微信
+	 * @param type 1为朋友圈，2为微信好友
+	 */
+	protected void share2WX(int type) {
+		// TODO Auto-generated method stub
+		Debug.Out("aaaaaaaaaaa");
+		if(WXApi==null){
+			Debug.Out("api ==null");
+			return;
+		}
+		if(!WXApi.isWXAppInstalled()){
+			Debug.Out("wx not installed ");
+			return ;
+		}
+		if(!WXApi.isWXAppSupportAPI()){
+			Debug.Out("current wxapp not support this api ");
+			return ;
+		}
+		Debug.Out("bbbbbbbbbb");
+		WXTextObject textObj=new WXTextObject("微信分享测试");
+		WXMediaMessage wxMsg=new WXMediaMessage();
+		wxMsg.mediaObject=textObj;
+		wxMsg.description="描述信息";
+		SendMessageToWX.Req req=new SendMessageToWX.Req();
+		req.message=wxMsg;
+		req.transaction=String.valueOf(System.currentTimeMillis());
+		if(type==1){
+			req.scene=SendMessageToWX.Req.WXSceneTimeline;
+		}
+		WXApi.sendReq(req);
+		Debug.Out("ccccccccc");
+	}
+
+	private void toastString(String string){
+		ToastUtils.toastMessage(string);
+	}
+	/**
+	 * 
+	 * @return
+	 * Back键管理
+	 */
+	public boolean onKeyBack() {
+
+		return false;
+		
+	}
+
+}

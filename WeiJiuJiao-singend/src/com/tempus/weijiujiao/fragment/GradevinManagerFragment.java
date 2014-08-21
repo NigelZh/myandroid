@@ -1,0 +1,1398 @@
+package com.tempus.weijiujiao.fragment;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONException;
+
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.qq.wx.voice.recognizer.VoiceRecognizerDialog;
+import com.qq.wx.voice.recognizer.VoiceRecognizerListener;
+import com.qq.wx.voice.recognizer.VoiceRecognizerResult;
+import com.qq.wx.voice.recognizer.VoiceRecognizerResult.Word;
+import com.qq.wx.voice.recognizer.VoiceRecordState;
+import com.tempus.weijiujiao.DetailActivity;
+import com.tempus.weijiujiao.MyApplication;
+import com.tempus.weijiujiao.R;
+import com.tempus.weijiujiao.HTTP.ParserResult;
+import com.tempus.weijiujiao.HTTP.Result;
+import com.tempus.weijiujiao.HTTP.Service;
+import com.tempus.weijiujiao.HTTP.onResultListener;
+import com.tempus.weijiujiao.Socket.SocketService;
+import com.tempus.weijiujiao.Socket.SocketService.MyBinder;
+import com.tempus.weijiujiao.Utils.BitmapUtils;
+import com.tempus.weijiujiao.Utils.Debug;
+import com.tempus.weijiujiao.Utils.JsonParser;
+import com.tempus.weijiujiao.Utils.StringUtils;
+import com.tempus.weijiujiao.Utils.TimeCount;
+import com.tempus.weijiujiao.Utils.ToastUtils;
+import com.tempus.weijiujiao.adapter.GradevinInforListViewAdapter;
+import com.tempus.weijiujiao.adapter.GradevinLocationShowAdapter;
+import com.tempus.weijiujiao.adapter.GradevinManagerGridviewAdapter;
+import com.tempus.weijiujiao.adapter.GradevinMonitorListViewAdapter;
+import com.tempus.weijiujiao.bean.Device;
+import com.tempus.weijiujiao.bean.ProductInfo;
+import com.tempus.weijiujiao.bean.ProductInfo.BasicInfo;
+import com.tempus.weijiujiao.constant.Constant;
+import com.tempus.weijiujiao.view.ChartView;
+import com.tempus.weijiujiao.view.CustomDialog;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AbsListView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.ViewFlipper;
+
+/**
+ * 酒柜管理
+ * 
+ * @author _blank :24611015@qq.com
+ * 
+ */
+public class GradevinManagerFragment extends Fragment {
+	private GridView gv;
+	private LayoutInflater inflater;
+	private ViewFlipper viewFlipper = null;
+	private int currnetIndex = 0;
+	private String frontTitle, frontAndUpTitle = null;// 返回时记录之前的标题
+	private EditText et_search;
+	GradevinManagerGridviewAdapter gridViewAdapter;
+	private Device device;
+	DetailActivity dActivity;
+	private List<BasicInfo> basicInfoList = new ArrayList<BasicInfo>();
+	private int locationShowIndex = 0;
+	GradevinLocationShowAdapter locationListAdapter;
+	View locationView;
+	private boolean ismonitorPage = false;
+	private SocketService socketService;
+	GradevinMonitorListViewAdapter adapter;
+	private TextView tv_head_temp;
+	GradevinInforListViewAdapter deviceInfoAdapter;
+	private VoiceRecognizerDialog mVoiceRecognizerDialog;
+	ProgressDialog pDialog;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		Bundle b = getArguments();
+		device = (Device) b.getSerializable("device");
+		dActivity = (DetailActivity) getActivity();
+	}
+
+	Handler uihandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case 0:// 获取酒位列表成功
+				locationListAdapter.notifyDataSetChanged();
+				break;
+			case 1:// 解析酒位列表失败
+				ToastUtils.toastMessage("解析JSON失败");
+				break;
+			case 2:// 获取酒位列表失败
+				ToastUtils.toastMessage("获取酒位列表失败了");
+				break;
+			case 3:// 设备流转获取验证码成功
+				ToastUtils.toastMessage("授权码已发送到您的手机，请注意查收！");
+				break;
+			case 4:// 设备流转获取验证码失败
+				ToastUtils.toastMessage("设备授权失败！！");
+				break;
+			case 5:// 手机号码格式错误
+				ToastUtils.toastMessage("请输入正确的11位手机号码！");
+				break;
+			case 6:// 设备信息更新成功
+				ToastUtils.toastMessage("设备信息更新成功！");
+				update(msg.obj.toString(), msg.arg1);
+				break;
+			case 7:// 设备信息更新失败
+				ToastUtils.toastMessage("更新失败了！");
+				break;
+			case 8:// 头像更新成功了
+				ToastUtils.toastMessage("头像更新成功了！");
+				updateDeviceImage(msg.obj.toString());
+				break;
+			case 9:// 头像更新失败了
+				ToastUtils.toastMessage("头像更新失败了！！");
+				break;
+			case 20://是他的酒柜进行授权
+				initGradevinAuthorize();
+				dActivity.setTitle("酒柜授权");
+				frontTitle = dActivity.getActivityTitle();
+				break;
+			case 21:
+				ToastUtils.toastMessage("您没有权限！");
+				break;
+			case 98:
+				ToastUtils.toastMessage("服务器异常");
+				break;
+			case 99:
+				ToastUtils.toastMessage("网络异常");
+				break;
+			case 999:
+				if(pDialog==null){
+					pDialog=CustomDialog.createProgressDialog(getActivity());
+				}
+				pDialog.show();
+				break;
+			case 998:
+				CustomDialog.hideProgressDialog(pDialog);
+				break;
+			default:
+				break;
+			}
+		}
+	};
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (!device.isOwn()) {
+			gridViewAdapter.hideAutoryItem();
+		} else {
+			gridViewAdapter.showAutoryItem();
+		}
+	}
+
+	protected void updateDeviceImage(String imageURL) {
+		// TODO Auto-generated method stub
+		if (deviceImageView != null) {
+			MyApplication
+					.getinstance()
+					.getImageLoader()
+					.loadImage(device.getImgURL(),
+							new SimpleImageLoadingListener() {
+								@SuppressWarnings("deprecation")
+								@Override
+								public void onLoadingComplete(String arg0,
+										View arg1, Bitmap arg2) {
+									deviceImageView
+											.setBackgroundDrawable(new BitmapDrawable(
+													arg2));
+								}
+							});
+
+		}
+	}
+
+	protected void update(String newValue, int updatePosition) {
+		// TODO Auto-generated method stub
+		switch (updatePosition) {
+		case 1:
+			//Debug.Out("update 11111");
+			device.setName(newValue);
+			break;
+		case 2:
+			//MyApplication.getinstance().getUser().setUserNumber(newValue);
+			break;
+		case 3:
+			//MyApplication.getinstance().getUser().setUserEmail(newValue);
+			break;
+		case 5:
+			device.setAddress(newValue);
+			break;
+		case 6:
+			Debug.Out("update 66666");
+			device.setRemark(newValue);
+			break;
+		default:
+			break;
+		}
+		deviceInfoAdapter.notifyDataSetChanged();
+		sendBroadCast();
+		onKeyBack();
+	}
+
+	private void sendBroadCast() {
+		// TODO Auto-generated method stub
+		Intent intent = new Intent(Constant.Action.ACTION_ADDDEVICE_DONE);
+		intent.putExtra("deviceType", 2);
+		MyApplication.getinstance().getApplicationContext()
+				.sendBroadcast(intent);
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		this.inflater = inflater;
+		DetailActivity dActivity = (DetailActivity) getActivity();
+		frontAndUpTitle = dActivity.getActivityTitle();
+		viewFlipper = (ViewFlipper) inflater.inflate(
+				R.layout.gradevin_mangager_layout, null);
+		((TextView) viewFlipper.findViewById(R.id.tv_gradevin_manager_num))
+				.setText(device == null ? "" : device.getId());
+		LinearLayout llGradevinManager = (LinearLayout) viewFlipper
+				.findViewById(R.id.ll_gradevin_manager);
+		gv = (GridView) llGradevinManager
+				.findViewById(R.id.vp_gradevin_manager_gv);
+		gridViewAdapter = new GradevinManagerGridviewAdapter(inflater,
+				dActivity);
+		gv.setAdapter(gridViewAdapter);
+		gv.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				// TODO Auto-generated method stub
+				addScenndView(arg2);
+			}
+		});
+		return viewFlipper;
+	}
+
+	private void addScenndView(int position) {
+		switch (position) {
+		case 0:
+			initGradevinLocationShow();
+			dActivity.setTitle("酒位展示");
+			frontTitle = dActivity.getActivityTitle();
+			break;
+		case 1:
+			initGradevinMonitor();
+			dActivity.setTitle("酒柜监控");
+			frontTitle = dActivity.getActivityTitle();
+			break;
+		case 2:
+			initGradevinStorage();
+			dActivity.setTitle("酒柜储存");
+			frontTitle = dActivity.getActivityTitle();
+			break;
+		case 3:
+			initGradevinInfor();
+			dActivity.setTitle("酒柜信息");
+			frontTitle = dActivity.getActivityTitle();
+			break;
+		case 4:			
+			isOwner(device.getId());//判断是否是他的酒柜
+			break;
+		default:
+			break;
+		}
+
+	}
+
+	private void isOwner(String deviceId) {
+		Service.getInstance(getActivity()).requestIsUserDevice(MyApplication.getinstance().getUser().getUserID(), deviceId, new onResultListener(){
+			@Override
+			public void onResult(Result result) {
+				// TODO Auto-generated method stub
+				if (result.getStatucCode() == 0) {
+					try {
+						ParserResult parserResult = JsonParser.parserDeviceAuthority(result.getJsonBody());
+						int code = parserResult.getCode();
+						if (code == 0) {
+							uihandler.sendEmptyMessage(20);//是他的设备
+						} else if (code == 1) {
+							uihandler.sendEmptyMessage(21);//不是他的设备
+						} else {
+							uihandler.sendEmptyMessage(98);//服务器异常
+						}
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+
+			@Override
+			public void onNetError(Result result) {
+				// TODO Auto-generated method stub
+				uihandler.sendEmptyMessage(99);
+			}
+
+			@Override
+			public void onStart() {
+				// TODO Auto-generated method stub
+				uihandler.sendEmptyMessage(999);
+			}
+
+			@Override
+			public void onFinish() {
+				// TODO Auto-generated method stub
+				uihandler.sendEmptyMessage(998);
+			}});
+	}
+
+	/**
+	 * 酒柜授权页面
+	 */
+	private void initGradevinAuthorize() {
+		// TODO Auto-generated method stub
+		View CirculationView = inflater.inflate(
+				R.layout.device_circulation_layout, null);
+		TextView tv_deviceID = (TextView) CirculationView
+				.findViewById(R.id.device_circulation_device_id_tv);
+		tv_deviceID.setText(device.getId());
+		final EditText ed_number = (EditText) CirculationView
+				.findViewById(R.id.device_circulation_phone_number_ed);
+		Button button_confirm = (Button) CirculationView
+				.findViewById(R.id.device_circulation_confirm);
+		button_confirm.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View view) {
+				// TODO Auto-generated method stub
+				String numString = ed_number.getText().toString();
+				if (StringUtils.isPhoneNumber(numString)) {
+					requestForCirculationCode(numString);
+					new TimeCount(60 * 1000, 1000, (Button) view).start();
+				} else {
+					uihandler.sendEmptyMessage(5);
+				}
+			}
+		});
+		changeVp(1, CirculationView);
+	}
+
+	protected void requestForCirculationCode(String phoneNumber) {
+		// TODO Auto-generated method stub
+		Service.getInstance(getActivity()).requestCode(MyApplication.getinstance().getUser().getUserID(),phoneNumber, 1,
+				device.getId(), new onResultListener() {
+					@Override
+					public void onResult(Result result) {
+						// TODO Auto-generated method stub
+						try {
+							ParserResult presult = JsonParser.parserRandomCode(result.getJsonBody());
+							if (presult.getCode() == 0) {
+								uihandler.sendEmptyMessage(3);
+							}
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+
+					@Override
+					public void onNetError(Result result) {
+						// TODO Auto-generated method stub
+						uihandler.sendEmptyMessage(4);
+					}
+
+					@Override
+					public void onStart() {
+						// TODO Auto-generated method stub:请求验证没没有加进度条
+						
+					}
+
+					@Override
+					public void onFinish() {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+	}
+
+	/**
+	 * 酒柜信息页面
+	 */
+	ImageView deviceImageView;
+
+	private void initGradevinInfor() {
+		// TODO Auto-generated method stub
+		LinearLayout lyGradevinInfor = (LinearLayout) inflater.inflate(
+				R.layout.gradevin_infor_layout, null);
+		ListView lvGradevinInfor = (ListView) lyGradevinInfor
+				.findViewById(R.id.lv_gradevin_infor);
+		LinearLayout lLayout = (LinearLayout) lyGradevinInfor
+				.findViewById(R.id.ll_gradevin_infor_changerpic);
+		deviceImageView = (ImageView) lyGradevinInfor
+				.findViewById(R.id.iv_gradevin_infor_gradevin_pic);
+		lLayout.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				if (device.isOwn()) {
+					UpdateDeviceImage();
+				} else {
+					ToastUtils.toastMessage("您没有权限这么做！");
+				}
+
+			}
+		});
+		if (!StringUtils.isNull(device.getImgURL())) {
+			MyApplication
+					.getinstance()
+					.getImageLoader()
+					.loadImage(device.getImgURL(),
+							new SimpleImageLoadingListener() {
+								@SuppressWarnings("deprecation")
+								@Override
+								public void onLoadingComplete(String arg0,
+										View arg1, Bitmap arg2) {
+									deviceImageView
+											.setBackgroundDrawable(new BitmapDrawable(
+													arg2));
+								}
+							});
+		}
+		deviceInfoAdapter = new GradevinInforListViewAdapter(inflater, device,2);
+		lvGradevinInfor.setAdapter(deviceInfoAdapter);
+		lvGradevinInfor.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View itemView,
+					int position, long arg3) {
+				// TODO Auto-generated method stub
+				if (device.isOwn()) {
+					String lastStr = ((TextView) itemView
+							.findViewById(R.id.tv_gradevin_infor_list_otheritem_num))
+							.getText().toString();
+					toDeviceInfoPage(lastStr, position);
+				} else {
+
+					ToastUtils.toastMessage("您没有权限这么做！！");
+				}
+			}
+		});
+		changeVp(1, lyGradevinInfor);
+	}
+
+	protected void UpdateDeviceImage() {
+		// TODO Auto-generated method stub
+		Intent innerIntent = new Intent(Intent.ACTION_GET_CONTENT);
+		innerIntent.putExtra("crop", "true");
+		innerIntent.putExtra("aspectX", 1);
+		innerIntent.putExtra("aspectY", 1);
+		innerIntent.setType("image/*");
+		innerIntent.putExtra("outputX", 200);
+		innerIntent.putExtra("outputY", 200);
+		startActivityForResult(innerIntent, 200);
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == Activity.RESULT_OK && requestCode == 200) {
+			Bitmap bmap = data.getParcelableExtra("data");
+			if (bmap != null) {
+				requestForUpdateImage(bmap);
+			}
+		}
+	}
+
+	private void requestForUpdateImage(Bitmap bitmap) {
+		// TODO Auto-generated method stub
+		Service.getInstance(dActivity).uploadDeviceImage(
+				MyApplication.getinstance().getUser().getUserID(),
+				device.getId(), 2, BitmapUtils.Bitmap2Bytes(bitmap),
+				new onResultListener() {
+					@Override
+					public void onResult(Result result) {
+						// TODO Auto-generated method stub
+						if (result.getStatucCode() == 0) {
+							try {
+								ParserResult presult = JsonParser
+										.parserUploadImage(result.getJsonBody());
+								if (presult.getCode() == 0) {
+									Message msg = new Message();
+									msg.what = 8;
+									msg.obj = presult.getObj().toString();
+									uihandler.sendMessage(msg);
+								} else {
+									uihandler.sendEmptyMessage(9);
+								}
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+								uihandler.sendEmptyMessage(9);
+							}
+						} else {
+							uihandler.sendEmptyMessage(9);
+						}
+					}
+
+					@Override
+					public void onNetError(Result result) {
+						// TODO Auto-generated method stub
+						Debug.Out(result.getErrorInfo());
+						uihandler.sendEmptyMessage(9);
+					}
+
+					@Override
+					public void onStart() {
+						// TODO Auto-generated method stub
+						uihandler.sendEmptyMessage(999);
+					}
+
+					@Override
+					public void onFinish() {
+						// TODO Auto-generated method stub
+						uihandler.sendEmptyMessage(998);
+					}
+				});
+	}
+
+	/**
+	 * 
+	 * @param view
+	 *            对应视图
+	 * @param position
+	 *            对应视图的位置position
+	 */
+	private void toDeviceInfoPage(String lastStr, int position) {
+		// TODO Auto-generated method stub
+		DetailActivity dActivity = (DetailActivity) getActivity();
+		String[] InfotitleArray = { "昵称修改", "手机修改", "邮箱修改", "酒柜位置修改", "地址修改",
+				"备注信息" };
+		if (position == 1 || position == 5 || position == 6) {
+			dActivity.setTitle(InfotitleArray[position - 1]);
+			textChanged(lastStr, position);
+		} else {
+			return;
+		}
+	}
+
+	/**
+	 * 酒柜昵称修改
+	 */
+	private void textChanged(final String lastStr, final int position) {
+		LinearLayout llChangerStr = (LinearLayout) inflater.inflate(
+				R.layout.user_login_changer_infro_layout, null);
+		final EditText etv = (EditText) llChangerStr
+				.findViewById(R.id.ed_user_login_changer_infro);
+		etv.setText(lastStr);
+		Button bt = (Button) llChangerStr
+				.findViewById(R.id.btn_user_login_changer_infro);
+		bt.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				String newstr = etv.getText().toString().trim();
+				if (newstr.equals(lastStr)) {
+
+					ToastUtils.toastMessage("您并未对当前信息做任何修改！！");
+					onKeyBack();
+				} else {
+					handUpdateInfo(newstr, position);
+				}
+			}
+		});
+		changeVp(2, llChangerStr);
+	}
+
+	protected void handUpdateInfo(final String newstr, final int position) {
+		// TODO Auto-generated method stub
+		int updateType = -1;
+		switch (position) {
+		case 1:
+			updateType = 0;
+			break;
+		case 2:
+			updateType = 1;
+			break;
+		case 3:
+			updateType = 2;
+			break;
+		case 5:
+			updateType = 3;
+			break;
+		case 6:
+			updateType = 4;
+			break;
+		default:
+			break;
+		}
+		if (updateType != -1) {
+			Service.getInstance(dActivity).deviceUpdate(
+					MyApplication.getinstance().getUser().getUserID(),
+					device.getId(), 2, updateType, newstr,
+					new onResultListener() {
+
+						@Override
+						public void onResult(Result result) {
+							// TODO Auto-generated method stub
+							try {
+								ParserResult presult = JsonParser
+										.parserInfoUpdate(result.getJsonBody());
+								if (presult.getCode() == 0) {
+									Message msg = new Message();
+									msg.what = 6;
+									msg.arg1 = position;
+									msg.obj = newstr;
+									uihandler.sendMessage(msg);
+								} else {
+									uihandler.sendEmptyMessage(7);
+								}
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+								uihandler.sendEmptyMessage(7);
+								Debug.Out(e.toString());
+							}
+						}
+
+						@Override
+						public void onNetError(Result result) {
+							// TODO Auto-generated method stub
+							uihandler.sendEmptyMessage(7);
+							Debug.Out(result.getErrorInfo());
+						}
+
+						@Override
+						public void onStart() {
+							// TODO Auto-generated method stub
+							uihandler.sendEmptyMessage(999);
+						}
+
+						@Override
+						public void onFinish() {
+							// TODO Auto-generated method stub
+							uihandler.sendEmptyMessage(998);
+						}
+					});
+		}
+	}
+
+	/**
+	 * 酒柜存储页面
+	 */
+	private void initGradevinStorage() {
+		// TODO Auto-generated method stub
+		ChartView chartView = new ChartView(getActivity());
+		chartView.init(device.getSize(), device.getStock());
+		changeVp(1, chartView);
+	}
+
+	/**
+	 * 酒柜实时监控页面
+	 */
+	int temper = 0;
+
+	private void initGradevinMonitor() {
+		// TODO Auto-generated method stub
+		ismonitorPage = true;
+		LinearLayout lyGradevinMonitor = (LinearLayout) inflater.inflate(
+				R.layout.gradevin_monitor_layout, null);
+		ListView lvGradevinMonitor = (ListView) lyGradevinMonitor
+				.findViewById(R.id.lv_gradevin_monitot);
+		tv_head_temp = (TextView) lyGradevinMonitor
+				.findViewById(R.id.tv_gradevin_monitor_temperature);
+		ImageButton add = (ImageButton) lyGradevinMonitor
+				.findViewById(R.id.img_btn_gradevin_monitor_add);
+		ImageButton reduce = (ImageButton) lyGradevinMonitor
+				.findViewById(R.id.img_btn_gradevin_monitor_reduce);
+		add.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				if (device.isOwn()) {
+					setTemper(true, temper);
+				} else {
+					ToastUtils.toastMessage("您没有权限这么做！");
+				}
+			}
+		});
+		reduce.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				if (device.isOwn()) {
+					setTemper(false, temper);
+				} else {
+					ToastUtils.toastMessage("您没有权限这么做！！");
+				}
+			}
+		});
+		adapter = new GradevinMonitorListViewAdapter(inflater);
+		lvGradevinMonitor.setAdapter(adapter);
+		lvGradevinMonitor.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View itemView,
+					int position, long arg3) {
+				// TODO Auto-generated method stub
+				if (device.isOwn()) {
+					monitorItemViewOnclik(position);
+				} else {
+					ToastUtils.toastMessage("您没有权限这么做！！");
+				}
+			}
+		});
+		changeVp(1, lyGradevinMonitor);
+		registerMyReciver();
+		bindMyService();
+	}
+
+	protected void monitorItemViewOnclik(int position) {
+		// TODO Auto-generated method stub
+		switch (position) {
+		case 3:
+			requestLockOrUnlock();
+			break;
+		case 4:
+			requestLightOrUnlight();
+			break;
+		case 5:
+			toSetPassWordPage();
+			break;
+		default:
+			break;
+		}
+	}
+
+	private void requestLightOrUnlight() {
+		// TODO Auto-generated method stub
+		if (adapter != null && socketService != null) {
+			socketService.setLamper(System.currentTimeMillis() + "",
+					device.getId(), "null", !adapter.getLightSate());
+		}
+	}
+
+	private void requestLockOrUnlock() {
+		// TODO Auto-generated method stub
+		if (adapter != null && socketService != null) {
+			socketService.setLock(System.currentTimeMillis() + "",
+					device.getId(), !adapter.getLockState());
+		}
+	}
+
+	EditText ed_old, ed_new, ed_checkNew;
+	Button btn_confirm;
+
+	private void toSetPassWordPage() {
+		// TODO Auto-generated method stub
+		dActivity.setTitle("密码修改");
+		LinearLayout llChangerPassword = (LinearLayout) inflater.inflate(
+				R.layout.user_login_changer_password_layout, null);
+		ed_old = (EditText) llChangerPassword
+				.findViewById(R.id.gradevin_manager_old_ed);
+		ed_new = (EditText) llChangerPassword
+				.findViewById(R.id.gradevin_manager_new_ed);
+		ed_checkNew = (EditText) llChangerPassword
+				.findViewById(R.id.gradevin_manager_check_ed);
+		btn_confirm = (Button) llChangerPassword
+				.findViewById(R.id.gradevin_manager_comfirm_btn);
+		btn_confirm.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				checkAndSendRequest();
+			}
+		});
+		changeVp(2, llChangerPassword);
+	}
+
+	protected void checkAndSendRequest() {
+		// TODO Auto-generated method stub
+		if (adapter != null && socketService != null) {
+			String oldWord = ed_old.getText().toString();
+			String newWord = ed_new.getText().toString();
+			String checkNew = ed_checkNew.getText().toString();
+			if (StringUtils.isNull(oldWord)) {
+				ToastUtils.toastMessage("原始密码不能为空");
+				return;
+			}
+			if (StringUtils.isMail(newWord)) {
+				ToastUtils.toastMessage("请输入新密码");
+				return;
+			}
+			if (StringUtils.isNull(checkNew)) {
+				ToastUtils.toastMessage("请输入确认密码");
+				return;
+			}
+			if (!checkNew.equals(newWord)) {
+				ToastUtils.toastMessage("两次输入不一致！请确认后重试！");
+				return;
+			}
+			if (checkLength(oldWord) && checkLength(newWord)) {
+				if (oldWord.equals(newWord)) {
+					ToastUtils.toastMessage("新密码不能与原始密码相同！");
+					return;
+				}
+				socketService.setPassowrd(System.currentTimeMillis() + "",
+						device.getId(), oldWord, newWord);
+			} else {
+				ToastUtils.toastMessage("密码长度应为4-10位数字！");
+			}
+
+		}
+	}
+
+	public boolean checkLength(String str) {
+		if (!StringUtils.isNull(str)) {
+			if (str.length() >= 4 && str.length() <= 10) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	protected void setTemper(boolean isADD, int currentTemp) {
+		// TODO Auto-generated method stub
+		if (adapter != null && socketService != null) {
+			if (isADD) {
+				if (currentTemp < 20) {
+					socketService.setTemper(System.currentTimeMillis() + "",
+							device.getId(), currentTemp + 1);
+				}
+			} else {
+				if (currentTemp > 10) {
+					socketService.setTemper(System.currentTimeMillis() + "",
+							device.getId(), currentTemp - 1);
+				}
+			}
+		}
+
+	}
+
+	BroadcastReceiver receiver;
+
+	private void registerMyReciver() {
+		// TODO Auto-generated method stub
+		receiver = new BroadcastReceiver() {
+
+			@Override
+			public void onReceive(Context arg0, Intent intent) {
+				// TODO Auto-generated method stub
+				Debug.Out(" gm  onReceive action", intent.getAction());
+				switch (intent.getAction()) {
+				case Constant.Action.SOCKET_BROADCAST_ACTION:
+					// Toast.makeText(getActivity(),
+					// intent.getStringExtra("data"), Toast.LENGTH_SHORT)
+					// .show();
+					// ToastUtils.toastMessage("密码长度应为4-10位数字！");
+					break;
+				case Constant.Action.ACTION_CONNECT:
+					int state = intent.getIntExtra("data", -1);
+					ToastUtils.toastMessage(state == 1 ? "服务器连接成功" : "服务器连接失败");
+					if (state == 1) {
+						socketService.getDeviceInfo(System.currentTimeMillis()
+								+ "", device.getId());
+					}
+					break;
+				case Constant.Action.ACTION_TEMPER:
+					int temp = intent.getIntExtra("data", -1);
+					if (temp != -1) {
+						updateTemp(temp);
+					}
+					break;
+				case Constant.Action.ACTION_INTEMPER:
+					int intemp = intent.getIntExtra("data", -1);
+					if (intemp != -1) {
+						updateInTemp(intemp);
+					}
+					break;
+				case Constant.Action.ACTION_HUMIDITY:
+					int humidity = intent.getIntExtra("data", -1);
+					if (humidity != -1) {
+						updateHumidity(humidity + "");
+					}
+				case Constant.Action.ACTION_INHUMIDITY:
+					int inhumidity = intent.getIntExtra("data", -1);
+					if (inhumidity != -1) {
+						updateInHumidity(inhumidity + "");
+					}
+					break;
+				case Constant.Action.ACTION_LAMP:
+					int lampstate = intent.getIntExtra("lampState", -1);
+					if (lampstate != -1) {
+						updateLampState(lampstate == 1 ? true : false);
+					}
+					break;
+				case Constant.Action.ACTION_LOCK:
+					int islock = intent.getIntExtra("data", -1);
+					if (islock != -1) {
+						updateLockState(islock == 1 ? false : true);
+					}
+					break;
+				case Constant.Action.ACTION_PASSWORD:
+					int setState = intent.getIntExtra("data", -1);
+					if (setState != -1) {
+
+						ToastUtils.toastMessage("修改密码"
+								+ (setState == 1 ? "成功" : "失败"));
+					}
+					break;
+				case Constant.Action.ACTION_STATE:
+					int deviceState = intent.getIntExtra("data", -1);
+					if (deviceState != -1) {
+						ToastUtils.toastMessage("设备"
+								+ (deviceState == 1 ? "已连接" : "未连接或断开"));
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		};
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(Constant.Action.SOCKET_BROADCAST_ACTION);
+		intentFilter.addAction(Constant.Action.ACTION_CONNECT);
+		intentFilter.addAction(Constant.Action.ACTION_TEMPER);
+		intentFilter.addAction(Constant.Action.ACTION_INTEMPER);
+		intentFilter.addAction(Constant.Action.ACTION_HUMIDITY);
+		intentFilter.addAction(Constant.Action.ACTION_INHUMIDITY);
+		intentFilter.addAction(Constant.Action.ACTION_LAMP);
+		intentFilter.addAction(Constant.Action.ACTION_LOCK);
+		intentFilter.addAction(Constant.Action.ACTION_PASSWORD);
+		intentFilter.addAction(Constant.Action.ACTION_STATE);
+		intentFilter.addAction(Constant.Action.ACTION_SERVER_ERROR);
+		intentFilter.addAction(Constant.Action.ACTION_DISCONNECT);
+		getActivity().registerReceiver(receiver, intentFilter);
+	}
+
+	private void bindMyService() {
+		// TODO Auto-generated method stub
+		Intent intent = new Intent(getActivity(), SocketService.class);
+		intent.putExtra("id", device.getId());
+		intent.putExtra("deviceType", 2);
+		getActivity().bindService(intent, conn, Context.BIND_AUTO_CREATE);
+	}
+
+	protected void updateLockState(boolean islocked) {
+		// TODO Auto-generated method stub
+		if (ismonitorPage && adapter != null) {
+			adapter.updateLockState(islocked);
+		}
+	}
+
+	protected void updateLampState(boolean isOn) {
+		// TODO Auto-generated method stub
+		if (ismonitorPage && adapter != null) {
+			adapter.updateLightSate(isOn);
+		}
+	}
+
+	protected void updateHumidity(String humidity) {
+		// TODO Auto-generated method stub
+		if (ismonitorPage && adapter != null) {
+			adapter.updateHumidity(Integer.parseInt(humidity));
+		}
+	}
+
+	protected void updateInHumidity(String inhumidity) {
+		// TODO Auto-generated method stub
+		if (ismonitorPage && adapter != null) {
+			adapter.updateInHumidity(Integer.parseInt(inhumidity));
+		}
+	}
+
+	protected void updateInTemp(int temper) {
+		// TODO Auto-generated method stub
+		if (ismonitorPage && adapter != null) {
+			adapter.updateInTemputer(temper);
+		}
+	}
+
+	protected void updateTemp(int newtemper) {
+		// TODO Auto-generated method stub
+		if (ismonitorPage && adapter != null && tv_head_temp != null) {
+			temper = newtemper;
+			tv_head_temp.setText(temper + "℃");
+		}
+	}
+
+	private ServiceConnection conn = new ServiceConnection() {
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			// TODO Auto-generated method stub
+			socketService = null;
+		}
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			// TODO Auto-generated method stub
+			MyBinder binder = (MyBinder) service;
+			socketService = binder.getService();
+		}
+	};
+
+	protected void doTextSearch() {
+		if (StringUtils.isNull(et_search.getText().toString())) {
+			ToastUtils.toastMessage("检索关键字不能为空");
+			return;
+		}
+		requestLocationList(et_search.getText().toString().trim(), false);
+	}
+
+	protected void doSpeachSearch() {
+		if (mVoiceRecognizerDialog == null) {
+			preInitVoiceRecognizer();
+		}
+		mVoiceRecognizerDialog.show();
+	}
+
+	protected void clearEd() {
+		if (et_search != null) {
+			et_search.setText("");
+		}
+	}
+
+	private void preInitVoiceRecognizer() {
+		mVoiceRecognizerDialog = new VoiceRecognizerDialog(getActivity(), -1);
+		mVoiceRecognizerDialog.setSilentTime(1000);
+		mVoiceRecognizerDialog
+				.setOnRecognizerResultListener(new VoiceRecognizerListener() {
+					@Override
+					public void onVolumeChanged(int arg0) {
+					}
+
+					@Override
+					public void onGetVoiceRecordState(VoiceRecordState arg0) {
+					}
+
+					@Override
+					public void onGetResult(VoiceRecognizerResult result) {
+						// TODO Auto-generated method stub
+						String mRecognizerResult = "";
+						if (result != null && result.words != null) {
+							int wordSize = result.words.size();
+							StringBuilder results = new StringBuilder();
+							for (int i = 0; i < wordSize; ++i) {
+								Word word = (Word) result.words.get(i);
+								if (word != null && word.text != null) {
+									results.append(word.text.replace(" ", ""));
+								}
+							}
+							mRecognizerResult = results.toString();
+						}
+						et_search.setText(mRecognizerResult);
+						mVoiceRecognizerDialog.onDestroy();
+						mVoiceRecognizerDialog = null;
+					}
+
+					@Override
+					public void onGetError(int arg0) {
+						mVoiceRecognizerDialog.onDestroy();
+						mVoiceRecognizerDialog = null;
+					}
+				});
+		int ret = mVoiceRecognizerDialog.init(Constant.WXVoice.WXVOICE_KEY);
+		if (0 != ret) {
+			mVoiceRecognizerDialog.onDestroy();
+			mVoiceRecognizerDialog = null;
+		}
+	}
+
+	// TODO 图片按钮的点击事件
+	OnClickListener listener = new OnClickListener() {
+		@Override
+		public void onClick(View arg0) {
+			// TODO Auto-generated method stub
+			if (null != arg0.getTag()) {
+				return;
+			}
+			switch (arg0.getId()) {
+			case R.id.btn_gradevin_locationshow_doSearch:
+				doTextSearch();
+				break;
+			case R.id.img_btn_gradevin_speachsearch:
+				doSpeachSearch();
+				break;
+			case R.id.img_btn_gradevin_locationshow_search_del:
+				clearEd();
+				break;
+			default:
+				break;
+			}
+		}
+	};
+
+	/**
+	 * 酒位展示页面
+	 */
+	private void initGradevinLocationShow() {
+		initBaseView();
+		changeVp(1, locationView);
+		if (basicInfoList.size() <= 0) {
+			requestLocationList(null, false);
+		} else {
+			locationListAdapter.notifyDataSetChanged();
+		}
+	}
+
+	ImageButton speachSearch;
+	ImageButton search_del;
+	Button btn_search;
+
+	private void initBaseView() {
+		locationView = (LinearLayout) inflater.inflate(
+				R.layout.gradevin_locationshow_layout, null);
+		ListView listview = (ListView) locationView
+				.findViewById(R.id.lv_gradevin_locationshow);
+		speachSearch = (ImageButton) locationView
+				.findViewById(R.id.img_btn_gradevin_speachsearch);
+		speachSearch.setOnClickListener(listener);
+		search_del = (ImageButton) locationView
+				.findViewById(R.id.img_btn_gradevin_locationshow_search_del);
+		search_del.setOnClickListener(listener);
+		btn_search = (Button) locationView
+				.findViewById(R.id.btn_gradevin_locationshow_doSearch);
+		btn_search.setOnClickListener(listener);
+		et_search = (EditText) locationView
+				.findViewById(R.id.et_gradevin_locationshow_search);
+		et_search.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence arg0, int arg1, int arg2,
+					int arg3) {
+				int length = et_search.getText().toString().length();
+				if (length > 0) {
+					if (search_del.getVisibility() == View.GONE) {
+						search_del.setVisibility(View.VISIBLE);
+					}
+					if (speachSearch.getVisibility() == View.VISIBLE) {
+						speachSearch.setVisibility(View.GONE);
+					}
+				} else {
+					if (speachSearch.getVisibility() == View.GONE) {
+						speachSearch.setVisibility(View.VISIBLE);
+					}
+					if (search_del.getVisibility() == View.VISIBLE) {
+						search_del.setVisibility(View.GONE);
+					}
+				}
+
+			}
+
+			@Override
+			public void afterTextChanged(Editable arg0) {
+
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence arg0, int arg1,
+					int arg2, int arg3) {
+
+			}
+		});
+		locationListAdapter = new GradevinLocationShowAdapter(inflater,
+				basicInfoList);
+		listview.setAdapter(locationListAdapter);
+		listview.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				// TODO 进入商品详情页面
+				if(!isUnKownProducut(basicInfoList.get(arg2))){
+					Intent i = new Intent(getActivity(), DetailActivity.class);
+					i.putExtra("tag", Constant.Tag.TAG_PRODUCT_INFO);
+					i.putExtra("code", basicInfoList.get(arg2).getId());
+					i.putExtra("codeType", Constant.Tag.TAG_CODE_TYPE_PRODUCTID);
+					getActivity().startActivity(i);
+				}
+			}
+		});
+		listview.setOnScrollListener(new OnScrollListener() {
+			private int first, count, total;
+
+			@Override
+			public void onScrollStateChanged(AbsListView view, int state) {
+				// TODO Auto-generated method stub
+				if (state == SCROLL_STATE_IDLE) {
+					if (first + count >= total) {
+						if (et_search != null
+								&& StringUtils.isNull(et_search.getText()
+										.toString())) {
+							requestLocationList(et_search.getText().toString()
+									.trim(), true);
+						} else {
+							requestLocationList(null, true);
+						}
+					}
+				}
+			}
+
+			@Override
+			public void onScroll(AbsListView arg0, int firstVisibleItem,
+					int visibleItemCount, int totalItemCount) {
+				first = firstVisibleItem;
+				count = visibleItemCount;
+				total = totalItemCount;
+			}
+		});
+	}
+	protected boolean isUnKownProducut(BasicInfo basicInfo) {
+		// TODO Auto-generated method stub
+		if(basicInfo!=null){
+			if(!StringUtils.isNull(basicInfo.getId())){
+				if(basicInfo.getId().equals("-1")){
+					return true;
+				}
+			}
+			if(!StringUtils.isNull(basicInfo.getName())){
+				if(basicInfo.getName().trim().equals("未知酒")){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	/**
+	 * 获取酒位信息
+	 * 
+	 * @author lenovo
+	 * 
+	 */
+	private void requestLocationList(String key, boolean isadd) {
+		if (!isadd) {
+			locationShowIndex = 0;
+			if (basicInfoList.size() > 0) {
+				basicInfoList.clear();
+			}
+		}
+		if (key != null) {
+			Service.getInstance(getActivity()).requestSearch(device.getId(),
+					key, locationShowIndex, requestForLocatonListener);
+		} else {
+			Service.getInstance(dActivity).requestSearch(device.getId(),
+					locationShowIndex, 2, requestForLocatonListener);
+		}
+
+	}
+
+	onResultListener requestForLocatonListener = new onResultListener() {
+		@Override
+		public void onResult(Result result) {
+			// TODO Auto-generated method stub
+			try {
+				ParserResult presult = JsonParser.parserSearch(result
+						.getJsonBody());
+				if (presult.getCode() == 0) {
+					@SuppressWarnings("unchecked")
+					List<ProductInfo> infolist = (List<ProductInfo>) presult
+							.getObj();
+					if (infolist != null && infolist.size() >= 0) {
+						for (ProductInfo pinfo : infolist) {
+							basicInfoList.add(pinfo.getBasicinfo());
+						}
+						locationShowIndex++;
+						uihandler.sendEmptyMessage(0);
+					}
+				} else {
+					uihandler.sendEmptyMessage(2);
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				uihandler.sendEmptyMessage(1);
+			}
+		}
+
+		@Override
+		public void onNetError(Result result) {
+			// TODO Auto-generated method stub
+			Debug.Out(result.getErrorInfo());
+			uihandler.sendEmptyMessage(2);
+		}
+
+		@Override
+		public void onStart() {
+			// TODO Auto-generated method stub
+			uihandler.sendEmptyMessage(999);
+		}
+
+		@Override
+		public void onFinish() {
+			// TODO Auto-generated method stub
+			uihandler.sendEmptyMessage(998);
+		}
+	};
+
+	/**
+	 * vp切换
+	 * 
+	 * @param index
+	 *            要添加view的index
+	 * @param scendview
+	 *            要添加的view
+	 */
+	private void changeVp(int index, View scendview) {
+		// TODO Auto-generated method stub
+		int count = viewFlipper.getChildCount();
+		while (count > index) {
+			// 把之前的view删除掉
+			viewFlipper.removeViewAt(count - 1);
+			count = viewFlipper.getChildCount();
+		}
+		viewFlipper.addView(scendview);
+		showViewFillperNext();
+	}
+
+	/**
+	 * 判断是否还有下一页
+	 * */
+	private boolean showViewFillperNext() {
+		// TODO Auto-generated method stub
+		if (currnetIndex < viewFlipper.getChildCount() - 1) {
+			viewFlipper.clearAnimation();
+			// viewFlipper.setInAnimation(getActivity(), R.anim.in_right);
+			// viewFlipper.setOutAnimation(getActivity(), R.anim.out_left);
+			viewFlipper.showNext();
+			currnetIndex++;
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 判断是否还有上一页
+	 * */
+	private boolean showViewFillperPerious() {
+		// TODO Auto-generated method stub
+		if (currnetIndex > 0) {
+			viewFlipper.clearAnimation();
+			// viewFlipper.setInAnimation(getActivity(), R.anim.in_left);
+			// viewFlipper.setOutAnimation(getActivity(), R.anim.out_right);
+			viewFlipper.showPrevious();
+			currnetIndex--;
+			if (ismonitorPage) {
+				try {
+					getActivity().unbindService(conn);
+					getActivity().unregisterReceiver(receiver);
+					receiver = null;
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				ismonitorPage = false;
+				socketService = null;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	public boolean onKeyBack() {
+		if (dActivity.getActivityTitle().equals("酒位展示")
+				&& mVoiceRecognizerDialog != null) {
+			mVoiceRecognizerDialog.onDestroy();
+		}
+		if (showViewFillperPerious()) {
+			DetailActivity dActivity = (DetailActivity) getActivity();
+			if (currnetIndex > 0) {
+				dActivity.setTitle(frontTitle);
+			} else {
+				dActivity.setTitle(frontAndUpTitle);
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+}

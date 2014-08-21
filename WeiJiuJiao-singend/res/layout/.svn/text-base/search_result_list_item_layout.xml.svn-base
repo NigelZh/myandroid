@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="5dp"
+    android:background="@drawable/all_list_item_bg" >
+
+    <TextView
+        android:id="@+id/search_result_item_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="红土庄园色辣子红葡萄酒哇~"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/search_result_item_name_en"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/search_result_item_name"
+        android:text="GAGA DSSDFSD FS FA SDFASF"
+        android:textColor="@color/golden"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/search_result_seller_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/search_result_item_name_en"
+        android:padding="3dp"
+        android:text="商家："
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/search_result_seller_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/search_result_item_name_en"
+        android:layout_toRightOf="@id/search_result_seller_title"
+        android:padding="3dp"
+        android:text="名酒交易中心"
+        android:textSize="12sp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/img_btn_arrow" />
+
+</RelativeLayout>

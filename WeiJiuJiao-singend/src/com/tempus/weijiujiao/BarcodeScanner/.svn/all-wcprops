@@ -1,0 +1,95 @@
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner
+END
+CameraConfigurationManager.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/CameraConfigurationManager.java
+END
+DecodeThread.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/DecodeThread.java
+END
+CaptureActivityHandler.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/CaptureActivityHandler.java
+END
+FlashlightManager.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/FlashlightManager.java
+END
+DecodeHandler.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/DecodeHandler.java
+END
+CameraManager.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/CameraManager.java
+END
+InactivityTimer.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/InactivityTimer.java
+END
+Intents.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/Intents.java
+END
+AutoFocusCallback.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/AutoFocusCallback.java
+END
+FinishListener.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/FinishListener.java
+END
+DecodeFormatManager.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/DecodeFormatManager.java
+END
+ViewfinderResultPointCallback.java
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/ViewfinderResultPointCallback.java
+END
+ViewfinderView.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/ProjectApp/!svn/ver/22/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/ViewfinderView.java
+END
+PlanarYUVLuminanceSource.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/PlanarYUVLuminanceSource.java
+END
+PreviewCallback.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/ProjectApp/!svn/ver/2/WeiJiuJiao/src/com/tempus/weijiujiao/BarcodeScanner/PreviewCallback.java
+END

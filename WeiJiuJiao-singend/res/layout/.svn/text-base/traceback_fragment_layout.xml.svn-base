@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/layout_scan_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/trace_back_bg" >
+
+        <ImageButton
+            android:id="@+id/img_btn_scan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/img_btn_scan_bg" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/history_list_controller"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="防伪查询记录"
+            android:textColor="@color/gary" />
+
+        <TextView
+            android:id="@+id/trace_back_clear_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right"
+            android:drawableLeft="@drawable/delete_img"
+            android:drawablePadding="5dp"
+            android:text="清空记录"
+            android:textColor="@color/gary" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/traceback_history_listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </ListView>
+
+    <TextView 
+        android:id="@+id/trace_back_toscan_tv"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="您还没有防伪追溯查询记录哦，赶紧扫描一下吧！"/>
+</LinearLayout>

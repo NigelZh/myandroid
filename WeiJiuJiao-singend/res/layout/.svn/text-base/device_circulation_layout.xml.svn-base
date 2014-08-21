@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <LinearLayout
+        android:gravity="clip_vertical" 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView 
+            android:padding="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="设备编号："/>
+          <TextView 
+              android:id="@+id/device_circulation_device_id_tv"
+            android:padding="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+    </LinearLayout>
+       <LinearLayout
+        android:gravity="clip_vertical" 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="4"
+        android:padding="10dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/device_circulation_phone_number_ed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:inputType="number"
+            android:singleLine="true"
+            android:maxEms="11"
+            android:background="@drawable/input_bg"
+            android:layout_gravity="center_vertical"
+            android:hint="请输入您的手机号码"
+            android:padding="10dp" />
+
+          <Button 
+              android:id="@+id/device_circulation_confirm"
+            android:layout_margin="10dp"
+             android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="确定"
+            android:background="@drawable/bg_btn_verification_bg"
+            android:layout_weight="1"/>
+    </LinearLayout>
+</LinearLayout>
